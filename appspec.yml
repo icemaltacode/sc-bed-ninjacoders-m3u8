@@ -11,7 +11,7 @@ permissions:
     group: ubuntu
 hooks:
   ApplicationStop:
-    - location: deploy/stop.sh
+    - location: deploy/stopservice.sh
       timeout: 10
       runas: ubuntu
   AfterInstall:
@@ -19,6 +19,6 @@ hooks:
       timeout: 1200
       runas: ubuntu
   ApplicationStart:
-    - location: deploy/start.sh
+    - location: deploy/startservice.sh
       timeout: 60
       runas: ubuntu
