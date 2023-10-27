@@ -1,4 +1,24 @@
+version: 0.0
+os: linux
 files:
   - source: /
     destination: /var/www/html
 file_exists_behavior: OVERWRITE
+permissions:
+  - object: /
+    pattern: "**"
+    owner: ubuntu
+    group: ubuntu
+hooks:
+  ApplicationStop:
+    - location: backend/app/deploy/stop.sh
+      timeout: 10
+      runas: ubuntu
+  AfterInstall:
+    - location: backend/app/deploy/afterinstall.sh
+      timeout: 1200
+      runas: ubuntu
+  ApplicationStart:
+    - location: backend/app/deploy/start.sh
+      timeout: 60
+      runas: ubuntu
