@@ -156,7 +156,7 @@ if (esMain(import.meta)) {
                     'Press Ctrl-C to terminate.'
                 )
             );
-            break;
+            break; 
     }
 }
 
