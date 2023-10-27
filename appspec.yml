@@ -11,14 +11,14 @@ permissions:
     group: ubuntu
 hooks:
   ApplicationStop:
-    - location: backend/app/deploy/stop.sh
+    - location: deploy/stop.sh
       timeout: 10
       runas: ubuntu
   AfterInstall:
-    - location: backend/app/deploy/afterinstall.sh
+    - location: deploy/afterinstall.sh
       timeout: 1200
       runas: ubuntu
   ApplicationStart:
-    - location: backend/app/deploy/start.sh
+    - location: deploy/start.sh
       timeout: 60
       runas: ubuntu
