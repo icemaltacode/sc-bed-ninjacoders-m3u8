@@ -1,0 +1,131 @@
+<div class="card" style="margin-top: 10px;">
+    <div class="card-header">NinjaCoders Admin</div>
+    <div class="card-body">
+        <p>Select the admin function you need.</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><a href="/products">Product Management</a></li>
+            <li class="list-group-item"><a href="/showcases">Showcase Management</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 10px;">
+    <div class="card-header">Add Mastodon Post</div>
+    <div class="card-body">
+        <div class="alert alert-success" role="alert" id="post_alert" style="display: none;">
+            Post added successfully. <span id="view_post"></span>
+        </div>
+
+        <form id="postMastodon" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="postContent" class="form-label">Post Content</label>
+                <textarea class="form-control" id="status" name="status" rows="3" maxlength="500"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="featuredImage" class="form-label">Featured Image</label>
+                <input class="form-control" type="file" id="featuredImage" name="featuredImage">
+            </div>
+            <button type="submit" class="btn btn-primary">Post</button>
+        </form>
+    </div>
+</div>
+{{#section 'scripts'}}
+{{#if context}}
+<script>
+    let BASE_URI, REDIRECT_URI, CLIENT_ID;
+    if (window.location.hostname === 'localhost') {
+        BASE_URI = "http://api.ninjacoders.local:3000/mastodon";
+        REDIRECT_URI = "http://admin.ninjacoders.local:3000/mastodoncode"
+        CLIENT_ID = "TblYDMn4chq_GKSqIsQZHiAR3hR7zmwiXMO7YdrrCMc";
+    } else {
+        BASE_URI = "https://api.ninjacoders.local/mastodon";
+        REDIRECT_URI = "https://admin.coders.ninja/mastodoncode";
+        CLIENT_ID = "wAjcDmx-ElqwRUfebmZkApxrL4lvM3195eWx7oXPrG4";
+    }
+
+    document.getElementById('postMastodon').addEventListener('submit', (evt) => checkTokenAndAct(evt, sendPost));
+
+    async function sendPost() {
+        const body = new FormData(document.getElementById('postMastodon'));
+
+        let token = localStorage.getItem('mastodonToken');
+        fetch(`${BASE_URI}/post`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+            },
+            body})
+            .then(result => result.json())
+            .then(result => {
+                const html = `<a href="${result.url}" target="_blank">View post</a>.`;
+                document.getElementById('view_post').innerHTML = html;
+                document.getElementById('post_alert').style.display = 'block';
+                document.getElementById('status').value = '';
+                document.getElementById('featuredImage').value = '';
+            });
+    }
+
+    async function checkTokenAndAct(evt, cb) {
+        evt.preventDefault();
+
+        // Get existing bearer token
+        let token = localStorage.getItem('mastodonToken');
+
+        const valid = await fetch(`${BASE_URI}/verify?token=${token}`).then(response => response.ok);
+        if (valid) {
+            cb();
+        } else {
+            getTokenCode(cb);
+        }
+    }
+
+    function getTokenCode(cb) {
+        const URL = `https://mastodon.social/oauth/authorize?` + new URLSearchParams({
+            client_id: CLIENT_ID,
+            scope: "read write push",
+            redirect_uri: REDIRECT_URI,
+            response_type: 'code'
+        });
+
+        const popup = window.open(URL, "popup", "popup=true");
+        let code = '';
+        const checkPopup = setInterval(() => {
+            if (popup.window.location.href.includes(code)) {
+                code = gup('code', popup.window.location.href);
+                getClientToken(code, cb);
+                popup.close();
+            }
+            if (!popup || !popup.closed) return;
+            clearInterval(checkPopup);
+        }, 1000);
+    }
+
+    function getClientToken(code, cb) {
+        fetch(`${BASE_URI}/token?code=${code}`)
+            .then(result => result.json())
+            .then(result => {
+                localStorage.setItem('mastodonToken', result.access_token);
+                cb();
+            });
+    }
+
+    // https://community.esri.com/t5/arcgis-javascript-maps-sdk-questions/getting-the-map-service-rest-url-to-the-map-as-url/td-p/196865
+    function gup( name, url ) {
+        if (!url) url = location.href;
+        name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        var regexS = "[\\?&]"+name+"=([^&#]*)";
+        var regex = new RegExp( regexS );
+        var results = regex.exec( url );
+        return results == null ? null : results[1];
+    }
+
+    const localUserData = {
+        userEmail: "{{context.user.email}}",
+        token: "{{context.user.token}}",
+        refreshToken: "{{context.user.refreshToken}}",
+        lastRefresh: new Date()
+    };
+    localStorage.setItem('localUserData', JSON.stringify(localUserData));
+</script>
+{{/if}}
+{{/section}}

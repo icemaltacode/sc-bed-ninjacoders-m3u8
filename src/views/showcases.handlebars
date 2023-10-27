@@ -1,0 +1,35 @@
+<div class="d-flex justify-content-center">
+   <h1>Student Showcase</h1>
+</div>
+<div class="d-flex justify-content-center">
+   <p class="lead">Check out some the amazing projects our NinjaCoders have been working on!
+   </p>
+</div>
+
+{{#each showcases}}
+<div class="card mb-3">
+  <div class="row g-0">
+    <div class="col-md-4">
+      <img src="img/showcase/{{featuredImage}}" class="img-fluid rounded-start" alt="...">
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">{{title}}</h5>
+        {{#each authors}}
+        <p class="card-text">
+          <img src="img/avatar/{{avatar}}" style="width: 50px; border-radius: 50%;">
+          <a href="mailto:{{email}}">{{fullName}}</a>
+        </p>
+        {{/each}}
+        <div class="card-text"> 
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">{{description}}</li>
+            <li class="list-group-item">{{techUsed}}</li>
+            <li class="list-group-item"><a href="{{sourceLink}}">{{sourceLink}}</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{/each}}

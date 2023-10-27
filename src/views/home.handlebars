@@ -1,0 +1,66 @@
+<h1>Welcome to NinjaCoders</h1>
+<p>
+    Here's the latest from our Mastodon page:
+</p>
+<div class="row">
+    <div class="col-xs-12 col-md-6" style="margin-bottom: 10px;">
+        <div class="card">
+            <div class="card-header">Our Posts</div>
+            <div class="card-body">
+                <div id="posts-ours"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-md-6" style="margin-bottom: 10px;">
+        <div class="card">
+            <div class="card-header">#coding Posts</div>    
+            <div class="card-body">
+                <div id="posts-coding"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{{#section 'scripts'}}
+<script>
+    let BASE_URI;
+    if (window.location.hostname === 'localhost') {
+        BASE_URI = "http://api.ninjacoders.local:3000/mastodon";
+    } else {
+        BASE_URI = "https://api.coders.ninja/mastodon";
+    }
+
+    document.addEventListener('DOMContentLoaded', init, false);
+
+    function init() {
+        getPosts();
+    }
+
+    function getPosts() {
+        fetch(`${BASE_URI}/ourposts`)
+            .then(result => result.json())
+            .then(ourPosts => populatePosts(ourPosts, 'posts-ours'));
+        
+        fetch(`${BASE_URI}/poststag?tag=coding&limit=5`)
+            .then(result => result.json())
+            .then(taggedPosts => populatePosts(taggedPosts, 'posts-coding'));
+    }
+
+    function populatePosts(posts, container) {
+        let postCards = '';
+        for (const post of posts) {
+            postCards += `<div class="card" style="margin-bottom: 10px;">`;
+            if (post.media_attachments.length > 0) {
+                const img = post.media_attachments[0];
+                postCards += `<img src="${img.preview_url}" class="card-img-top" alt="${img.description}">`;
+            }
+            postCards += `<div class="card-body">${post.content}</div>`; 
+            const formattedDate = luxon.DateTime.fromISO(post.created_at).toRelative();
+            const author = container === 'posts-coding' ? `<img src="${post.account.avatar}" style="max-width: 30px; border-radius: 50%;"> <strong>@${post.account.acct}</strong>` : '';
+            postCards += `<div class="card-footer"><small>${author} ${formattedDate} | <a href="${post.url}" target="_blank">View on Mastodon</a></small></div>`;
+            postCards += `</div>`;
+        }
+
+        document.getElementById(container).innerHTML = postCards;
+    }
+</script>
+{{/section}}

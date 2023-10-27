@@ -1,0 +1,91 @@
+<h1>Product Management</h1>
+
+<div class="card">
+    <div class="card-header">Products</div>
+    <div class="card-body" id="product_list"></div>
+</div>
+
+<div class="card" style="margin-top: 10px;">
+    <div class="card-header" id="form_action_header">Add Product</div>
+    <div class="card-body" id="product_form"></div>
+</div>
+
+{{#section 'scripts'}}
+<script>
+    document.addEventListener('DOMContentLoaded', init, false);
+
+    function init() {
+        fetchProducts();
+        fetchProductForm();
+    }
+
+    function fetchProducts() {
+        fetch('/admin/prod_list.html')
+            .then(res => res.text())
+            .then(html => setContent('#product_list', html))
+            .then(() => {
+                return fetch('/api/products')
+                    .then(res => res.json())
+                    .then(data => populateProducts(data.products));
+            });
+    }
+
+    function populateProducts(products) {
+        let tableData = '';
+
+        for (const prod of products) {
+            tableData += `<tr style="cursor: pointer;" onclick="fetchProductForm('${prod.id}')">
+                <td>${prod.sku}</td>
+                <td>${prod.name}</td>
+                <td>${prod.price}</td>
+                <td>
+                    <button type="button" class="btn btn-danger" onclick="deleteProduct('${prod.id}')">
+                        <i class="bi-trash-fill"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }
+        setContent('#product_list table tbody', tableData);
+    }
+
+    function fetchProductForm(product_id) {
+        fetch('/admin/prod_form.html')
+            .then(res => res.text())
+            .then(html => setContent('#product_form', html))
+            .then(() => {
+                if (product_id) {
+                    return fetch(`/api/product/${product_id}`)
+                        .then(product => product.json())
+                        .then(product => {
+                            document.getElementById('prod_sku').value = product.sku;
+                            document.getElementById('prod_name').value = product.name;
+                            document.getElementById('prod_price').value = product.price;
+                            document.getElementById('prod_requires_deposit').checked = product.requiresDeposit;
+                            document.getElementById('prod_description').value = product.description;
+                            document.getElementById('prod_id').value = product._id;
+                        });
+                }
+            })
+            .then(() => {
+                document.getElementById('upsertProductForm').addEventListener('submit', evt => handleForm(evt));
+            });
+    }
+
+    function handleForm(evt) {
+        evt.preventDefault();
+
+        const body = new FormData(evt.target);
+        fetch('/api/product', { method: 'put', body })
+            .then(() => init());
+    }
+
+    function deleteProduct(product_id) {
+        fetch(`/api/product/${product_id}`, { method: 'delete' })
+            .then(() => init());
+    }    
+    
+    function setContent(query, html) {
+        document.querySelector(query).innerHTML = html;
+    }
+</script>
+{{/section}}

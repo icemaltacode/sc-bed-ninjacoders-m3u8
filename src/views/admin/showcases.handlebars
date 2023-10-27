@@ -1,0 +1,200 @@
+<h1>Showcase Management</h1>
+
+<div class="card">
+    <div class="card-header">Showcases</div>
+    <div class="card-body" id="showcase_list"></div>
+</div>
+
+<div class="card" style="margin-top: 10px;">
+    <div class="card-header" id="form_action_header">Add Showcase</div>
+    <div class="card-body" id="showcase_form"></div>
+</div>
+
+{{#section 'scripts'}}
+<script>
+    let BASE_URI;
+    if (window.location.hostname === 'localhost') {
+        BASE_URI = "http://api.ninjacoders.local:3000/mastodon";
+    } else {
+        BASE_URI = "https://api.coders.ninja/mastodon";
+    }
+
+    document.addEventListener('DOMContentLoaded', init, false);
+
+    function init() {
+        fetchShowcases();
+        fetchShowcaseForm();
+    }
+
+    function fetchShowcases() {
+        fetch('/admin/showcase_list.html')
+            .then(res => res.text())
+            .then(html => setContent('#showcase_list', html))
+            .then(() => {
+                return fetch(BASE_URI + '/showcase')
+                    .then(res => res.json())
+                    .then(res => populateShowcases(res.data));
+            });
+    }
+
+    function populateShowcases(showcases) {
+        let tableData = '';
+
+        for (const showcase of showcases) {
+            tableData += `<tr style="cursor: pointer;" onclick="fetchShowcaseForm(event, '${showcase._id}')">
+                <td>${showcase.title}</td>
+                <td>${showcase.sourceLink}</td>
+                <td>${showcase.techUsed}</td>
+                <td>
+                    <button type="button" class="btn btn-danger" onclick="deleteShowcase(event, '${showcase._id}')">
+                        <i class="bi-trash-fill"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }
+        setContent('#showcase_list table tbody', tableData);
+    }
+
+    function fetchShowcaseForm(event, showcase_id) {
+        if (event) {
+            const sender = event.target;
+            console.log(sender);
+            if (sender.classList.contains('btn') || sender.classList.contains('bi-trash-fill')) return;
+        }
+
+        fetch('/admin/showcase_form.html')
+            .then(res => res.text())
+            .then(html => setContent('#showcase_form', html))
+            .then(() => {
+                if (showcase_id) {
+                    return fetch(BASE_URI + `/showcase/${showcase_id}`)
+                        .then(res => res.json())
+                        .then(res => res.data)
+                        .then(showcase => {
+                            document.getElementById('title').value = showcase.title;
+                            document.getElementById('techUsed').value = showcase.techUsed;
+                            document.getElementById('sourceLink').value = showcase.sourceLink;
+                            document.getElementById('description').value = showcase.description;
+                            document.getElementById('id').value = showcase._id;
+                            for (let idx in showcase.authors) {
+                                let author_id = Number(idx) + 1;
+                                document.getElementById(`author${author_id}_name`).value = showcase.authors[idx].fullName;
+                                document.getElementById(`author${author_id}_email`).value = showcase.authors[idx].email;
+                            }
+                        });
+                }
+            })
+            .then(() => {
+                document.getElementById('upsertShowcaseForm').addEventListener('submit', evt => handleForm(evt));
+            });
+    }
+
+    async function handleForm(evt) {
+        evt.preventDefault();
+
+        const token = await getToken();
+        const body = new FormData(evt.target);
+
+        // Process the author data
+        const author1File = document.getElementById('author1_avatar');
+        const author1Avatar = author1File.files.length > 0 ? author1File.files[0].name : null;
+        const author1 = {
+            'fullName': body.get('author1_name'),
+            'email': body.get('author1_email'),
+            'avatar': author1Avatar
+        };
+        const author2File = document.getElementById('author2_avatar');
+        const author2Avatar = author2File.files.length > 0 ? author2File.files[0].name : null;
+        const author2 = {
+            'fullName': body.get('author2_name'),
+            'email': body.get('author2_email'),
+            'avatar': author2Avatar
+        };
+        body.append('author', JSON.stringify(author1));
+        body.append('author', JSON.stringify(author2));
+
+        fetch(BASE_URI + '/showcase', { 
+            method: 'PUT', 
+            headers: {
+                'Authorization': 'Bearer ' + token,
+            },
+            body 
+            })
+            .then(() => init());
+    }
+
+    async function deleteShowcase(evt, showcase_id) {
+        const token = await getToken();
+
+        fetch(BASE_URI + `/showcase/${showcase_id}`, { 
+            method: 'DELETE',
+            mode: 'cors',
+            credentials: 'include',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+            },
+            })
+            .then(() => init());
+    }
+
+    async function getToken() {
+        const localUserData = localStorage.getItem('localUserData');
+
+        if (!localUserData) {
+            sessionExpired();
+            return null;
+        }
+
+        const userData = JSON.parse(localUserData);
+        const now = new Date();
+        const lastRefresh = new Date(userData.lastRefresh);
+        const tokenAge = Math.abs(now.getTime() - lastRefresh.getTime())/1000;
+
+        if (tokenAge < 900 && userData.token !== '') {
+            console.log('use existing');
+            // Token is less than 15 mins old, can use existing token
+            return userData.token;
+        } else if (tokenAge < 3600) {
+            // Token is less than 1 hour old, can refresh token
+            await fetch(BASE_URI + '/token/refresh', {
+                method: 'PATCH',
+                mode: 'cors',
+                credentials: 'include',
+                headers: {
+                    'Authorization': 'Bearer ' + userData.token,
+                    'refreshToken': userData.refreshToken,
+                    'username': userData.userEmail
+                }
+                })
+                .then(res => res.json())
+                .then(res => {
+                    const localUserData = {
+                        userEmail: userData.userEmail,
+                        token: res.data.token,
+                        refreshToken: res.data.refreshToken,
+                        lastRefresh: new Date()
+                    };
+                    localStorage.setItem('localUserData', JSON.stringify(localUserData));
+                    return res.data.token;
+                })
+                .catch(err => {
+                    console.error(err);
+                    sessionExpired();
+                    return null;
+                });
+        } 
+
+        // Both token and refresh token have expired
+        sessionExpired();
+    }
+
+    function sessionExpired() {
+        alert("Your session has expired! Please login again.");
+        return;
+    }    
+    
+    function setContent(query, html) {
+        document.querySelector(query).innerHTML = html;
+    }
+</script>
+{{/section}}

@@ -1,0 +1,32 @@
+<form id="upsertProductForm" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label for="prod_sku" class="form-label">SKU</label>
+        <input type="text" class="form-control" id="prod_sku" name="prod_sku" required>
+    </div>
+    <div class="mb-3">
+        <label for="prod_name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="prod_name" name="prod_name" required>
+    </div>
+    <div class="mb-3">
+        <label for="prod_price" class="form-label">Price</label>
+        <input type="number" min="0" value="0" step=".01" class="form-control" id="prod_price" name="prod_price" required>
+    </div>
+    <div class="mb-3">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="prod_requires_deposit" name="prod_requires_deposit">
+            <label class="form-check-label" for="prod_requires_deposit">
+                Requires deposit
+            </label>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="prod_featured_image" class="form-label">Featured Image</label>
+        <input class="form-control" type="file" id="prod_featured_image" name="prod_featured_image">
+    </div>
+    <div class="mb-3">
+        <label for="prod_description" class="form-label">Description</label>
+        <textarea class="form-control" id="prod_description" name="prod_description" rows="3"></textarea>
+    </div>
+    <input type="hidden" id="prod_id" name="prod_id" value="">
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

@@ -1,0 +1,55 @@
+<form id="upsertShowcaseForm" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" class="form-control" id="title" name="title" required>
+    </div>
+    <div class="mb-3">
+        <label for="techUsed" class="form-label">Tech Used</label>
+        <input type="text" class="form-control" id="techUsed" name="techUsed" required>
+    </div>
+    <div class="mb-3">
+        <label for="sourceLink" class="form-label">Source Link</label>
+        <input type="url" pattern="https://.*" class="form-control" id="sourceLink" name="sourceLink" required>
+    </div>
+    <div class="mb-3">
+        <label for="featuredImage" class="form-label">Featured Image</label>
+        <input class="form-control" type="file" id="featuredImage" name="featuredImage">
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+    </div>
+    <div class="row row-cols-lg-auto g-3 align-items-center" style="margin: 5px auto 5px auto; display: flex; align-items: flex-start;">
+        <h6 style="align-self: flex-start;">Author 1</h6>
+        <div class="col-12">
+            <label for="author1_name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="author1_name" name="author1_name" required>
+        </div>
+        <div class="col-12">
+            <label for="author1_email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="author1_email" name="author1_email" required>
+        </div>
+        <div class="col-12">
+            <label for="author1_avatar" class="form-label">Avatar</label>
+            <input class="form-control" type="file" id="author1_avatar" name="avatar">
+        </div>
+    </div>
+    <div class="row row-cols-lg-auto g-3 align-items-center" style="margin: 5px auto 5px auto; display: flex; align-items: flex-start;">
+        <h6 style="align-self: flex-start;">Author 2</h6>
+        <div class="col-12">
+            <label for="author2_name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="author2_name" name="author2_name">
+        </div>
+        <div class="col-12">
+            <label for="author2_email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="author2_email" name="author2_email">
+        </div>
+        <div class="col-12">
+            <label for="author2_avatar" class="form-label">Avatar</label>
+            <input class="form-control" type="file" id="author2_avatar" name="avatar">
+        </div>
+    </div>
+    
+    <input type="hidden" id="id" name="id" value="">
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

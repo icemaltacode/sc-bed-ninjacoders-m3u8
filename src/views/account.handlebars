@@ -1,0 +1,17 @@
+<div class='d-flex justify-content-center'>
+    <h1>My Account</h1>
+</div>
+
+<div class='card mb-3'>
+    <div class='card-body'>
+        <h5 class='card-title'>Account Details</h5>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Email: </strong>{{user.email}}</li>
+            <li class="list-group-item"><strong>Name: </strong>{{user.name}}</li>
+            <li class="list-group-item"><strong>API Access: </strong>{{user.apiAccess}}</li>
+            <li class="list-group-item"><strong>Admin Access: </strong>{{user.isAdmin}}</li>
+            <li class="list-group-item"><strong>Created: </strong>{{user.created}}</li>
+            <li class="list-group-item"><strong>Auth ID: </strong>{{user.authId}}</li>
+        </ul>
+    </div>
+</div>
