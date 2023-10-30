@@ -7,7 +7,7 @@ file_exists_behavior: OVERWRITE
 permissions:
   - object: /
     pattern: "**"
-    owner: www-data
+    owner: ubuntu
     group: www-data
 hooks:
   ApplicationStop:
