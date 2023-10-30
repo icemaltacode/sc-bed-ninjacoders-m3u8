@@ -21,4 +21,4 @@ hooks:
   ApplicationStart:
     - location: deploy/startservice.sh
       timeout: 60
-      runas: ubuntu
+      runas: ubuntu 
