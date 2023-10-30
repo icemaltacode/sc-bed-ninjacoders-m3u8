@@ -7,8 +7,8 @@ file_exists_behavior: OVERWRITE
 permissions:
   - object: /
     pattern: "**"
-    owner: ubuntu
-    group: ubuntu
+    owner: www-data
+    group: www-data
 hooks:
   ApplicationStop:
     - location: deploy/stopservice.sh

@@ -78,14 +78,14 @@ authService.registerRoutes();
 const admin = express.Router();
 const api = express.Router();
 switch(app.get('env')) {
-    case 'development':
-        app.use(vhost('admin.ninjacoders.local', admin));
-        app.use(vhost('api.ninjacoders.local', api));
-        break;
-    case 'production':
-        app.use(vhost('admin.coders.ninja', admin));
-        app.use(vhost('api.coders.ninja', api));
-        break;
+case 'development':
+    app.use(vhost('admin.ninjacoders.local', admin));
+    app.use(vhost('api.ninjacoders.local', api));
+    break;
+case 'production':
+    app.use(vhost('admin.coders.ninja', admin));
+    app.use(vhost('api.coders.ninja', api));
+    break;
 }
 
 app.use(utilMiddleware);
@@ -95,14 +95,14 @@ app.use(requiresDeposit);
 
 // Logging Middleware
 switch(app.get('env')) {
-    case 'development':
-        app.use(morgan('dev'));
-        break;
-    case 'production': {
-        const stream = fs.createWriteStream(__dirname + '/access.log', { flags: 'a' });
-        app.use(morgan('combined', { stream }));
-        break;
-    }
+case 'development':
+    app.use(morgan('dev'));
+    break;
+case 'production': {
+    const stream = fs.createWriteStream(__dirname + '/access.log', { flags: 'a' });
+    app.use(morgan('combined', { stream }));
+    break;
+}
 }
 
 // Routes
@@ -126,19 +126,19 @@ process.on('uncaughtException', err => {
 
 let httpsOptions;
 switch(app.get('env')) {
-    case 'development':
-        httpsOptions = {
-            key: fs.readFileSync(__dirname + '/ssl/ninjacoders_dev.pem'),
-            cert: fs.readFileSync(__dirname + '/ssl/ninjacoders_dev.crt')
-        };
-        break;
-    case 'production': {
-        httpsOptions = {
-            key: fs.readFileSync(__dirname + '/ssl/ninjacoders.pem'),
-            cert: fs.readFileSync(__dirname + '/ssl/ninjacoders.crt')
-        };
-        break;
-    }
+case 'development':
+    httpsOptions = {
+        key: fs.readFileSync(__dirname + '/ssl/ninjacoders_dev.pem'),
+        cert: fs.readFileSync(__dirname + '/ssl/ninjacoders_dev.crt')
+    };
+    break;
+case 'production': {
+    httpsOptions = {
+        key: fs.readFileSync('/etc/letsencrypt/live/coders.ninja/privkey.pem'),
+        cert: fs.readFileSync('/etc/letsencrypt/live/coders.ninja/fullchain.pem')
+    };
+    break;
+}
 }
 
 if (esMain(import.meta)) {
@@ -149,14 +149,14 @@ if (esMain(import.meta)) {
     });
 
     switch(app.get('env')) {
-        case 'development':
-            app.listen(port, () =>
-                console.log(
-                    `Express started on http://localhost:${port} in ${app.get('env')} mode.` +
+    case 'development':
+        app.listen(port, () =>
+            console.log(
+                `Express started on http://localhost:${port} in ${app.get('env')} mode.` +
                     'Press Ctrl-C to terminate.'
-                )
-            );
-            break; 
+            )
+        );
+        break; 
     }
 }
 
