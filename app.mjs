@@ -158,6 +158,8 @@ if (esMain(import.meta)) {
         );
         break; 
     }
+} else {
+    console.log('Process is not started as main!');
 }
 
 export default app;
